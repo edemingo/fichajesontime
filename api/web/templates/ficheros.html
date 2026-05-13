@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>API Web - Consulta Accesos Tornos MARCONI 1</title>
+  <link rel="stylesheet" href="/static/main.css">
+</head>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+<script>
+  const filesSelected = 'selected'
+</script>
+
+<body >
+
+
+    <div id="liveAlertPlaceholder"></div>
+
+  
+
+  <!-- Main Content with offset for sidebar 
+  <div class="main-content" style="margin-left: 4.5em;">
+  -->
+
+<div class="container-fluid">
+        <h1 class="text-center">Gestión de Ficheros Tornos MARCONI 1</h1>
+        <!-- start row principal -->
+        <div class="row ">
+
+            <div class="col-1 border-1">
+                <!-- MENU VERTICAL -->
+                
+                <!-- Vertical Menu Sidebar -->
+                <div class="d-flex flex-column flex-shrink-0 border  sidebar" style="width: 4.0em;" id="mainMenu">
+                
+
+                    <!-- main menu  -->
+                    
+                </div>
+                <!-- END:  Vertical Menu Sidebar -->
+
+            </div>
+            <!-- END : MENU VERTICAL -->
+
+            <!-- col 9 principal LISTADO-->
+            <div class="col-9 border">
+
+
+
+
+
+                <div class="row align-items-start" id="results"></div>
+                <div class="row align-items-start" id="resultsFiles"></div>
+
+
+            </div>
+        </div>
+        <!-- end  row principal -->
+</div>
+
+
+
+
+<div class="modal fade" tabindex="-1" id="fileModalContent" aria-labelledby="fileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Contenido del fichero</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+  <script src="/static/navigation.js"></script>
+  <script src="/static/ficheros.js"></script>
+  <script src="/static/alerts.js"></script>
+  
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>    
+
+</body>
+
+</html>
+

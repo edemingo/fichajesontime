@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>API Web - Consulta Accesos Tornos MARCONI 1</title>
+  <link rel="stylesheet" href="/static/main.css">
+</head>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+<script>const statsSelected = 'selected'</script>
+
+<body >
+
+    <div id="liveAlertPlaceholder"></div>
+
+  <!-- Main Content with offset for sidebar 
+  <div class="main-content" style="margin-left: 4.5em;">
+  -->
+
+<div class="container-fluid">
+    <h1 class="text-center">Informes Accesos Marconi I</h1>
+    <!-- start row principal -->
+    <div class="row ">
+         <div class="row ">
+
+            <div class="col-1 border-1">
+            <!-- MENU VERTICAL -->
+             
+                 <!-- Vertical Menu Sidebar -->
+                <div class="d-flex flex-column flex-shrink-0 border  sidebar" style="width: 4.0em;" id="mainMenu">
+
+                
+                </div>
+                <!-- END:  Vertical Menu Sidebar -->
+
+            </div>
+            <!-- END : MENU VERTICAL -->
+        
+
+        <!-- col 9 principal LISTADO-->
+        <div class="col-9  " id="divPrincipal">
+
+          <form  id="filter-form" name="filter-form">
+
+            <div class="row border border-top-0 border-start-0 border-end-0">
+
+              <div class="p-4 col-4 "> 
+                              
+                    <!-- <div class="btn-group " role="group"></div> -->
+                            <div class="p-1">
+                                <label ><input type="date" class="form-control" id="field_fecha"  name="fecha" ></label>
+                            </div>
+                            <!-- 
+                            <div  class="p-1">                                    
+                                <label>Fecha hasta:<br> <input type="date" class="form-control" id="field_fecha_hasta"  name="fecha_hasta"/></label>
+                            </div>                            
+                            -->
+                    
+                      
+              </div>
+
+              <div class="p-5 col-2 ">
+                      <button class="btn btn-success no-display" id="button_buscar" type="button">
+                      Buscar <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                      </svg>
+                      </button>
+              </div>
+              
+
+              <div class="p-3 col text-end">
+                <!-- void -->
+
+                    <button id="btn-refresh-selected" class="btn btn-danger float-sm-right" type="button" >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+                        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+                        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+                        </svg> Actualizar seleccionado
+                    </button>
+
+
+              </div>
+
+            </div>
+
+
+          </form>
+
+          <div class="container">
+
+            <div class="row">
+              
+              <div class="col p-3 mt-3  border border-primary">
+
+                <div style="max-width:800px; max-height:800px;" class="container-md">
+                  <canvas id="fichajesChart"></canvas>
+                </div> 
+                
+              </div>
+
+
+              <div class="col-12 p-3 mt-3 border border-primary">
+
+                <div style="max-width:800px; max-height:800px;" class="container">
+                  <canvas id="totalFichajesChart"></canvas>
+                </div>
+
+              </div>
+
+
+
+            </div>
+          </div>
+          
+
+          
+
+          
+
+
+        </div>
+        <!-- END : col 9 principal LISTADO-->
+
+        
+
+        <script>
+  
+  
+</script>
+
+    </div>
+
+</div>
+<!-- end  row principal -->
+
+
+
+
+  <div class="modal fade" tabindex="-1" id="EmpleadosModalContent" aria-labelledby="EmpleadosModalContent" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Contenido de Factorial</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>        
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="/static/navigation.js"></script>
+  <script src="/static/informes.js"></script>
+  <script src="/static/alerts.js"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  
+</body>
+</html>

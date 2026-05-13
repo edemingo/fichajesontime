@@ -1,0 +1,52 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 2rem;
+}
+
+#filter-form {
+  margin-bottom: 2rem;
+}
+
+#results {
+  margin-top: 1rem;
+  border-top: 1px solid #ccc;
+  padding-top: 1rem;
+}
+
+p {
+  margin: 0.5rem 0;
+}
+
+.salida {
+    border-bottom: 1px solid rgb(247, 113, 113);
+    background-color: rgb(243, 201, 201);
+    color: black;
+    font-weight: bold;
+}
+
+.entrada {
+    border-bottom: 1px solid palegreen;
+    background-color: rgb(183, 248, 183);
+    color:green;
+    font-weight: bold;
+}
+
+
+.taberu {
+    border-bottom: 1px solid rgb(59, 60, 122);
+    background-color: rgb(183, 184, 240);
+    color:rgb(16, 1, 58);
+    font-weight: bold;
+}
+
+.no-display {
+    display: none!important;
+}
+
+.selected  {
+  background-color: rgb(183, 184, 240)!important;
+}
+
+.no-selected {
+
+}

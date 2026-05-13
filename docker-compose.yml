@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: python-postgres
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - python-network
+
+  # Aplicación FastAPI
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python-api
+    ports:
+      - "8500:8000"
+    environment:
+      DATABASE_URL: postgresql://appuser:apppass@postgres:5432/appdb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Para desarrollo, descomentar para sincronizar cambios en tiempo real
+      # - ./api:/app
+      - /home/edmingo/Movimientos:/home/edmingo/Movimientos
+    networks:
+      - python-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  python-network:
+    driver: bridge
