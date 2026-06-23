@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib import response
 import requests
 
 
@@ -60,3 +61,28 @@ class DorletAPI:
         # Por ejemplo, usando el módulo logging o simplemente escribiendo en un archivo de texto
         with open("dorlet_api.log", "a") as log_file:
             log_file.write(f"{message}\n")
+
+
+    def getShiftsDorletByEmployee(self, dni: int, fechaInicio: str, fechaFin: str):
+
+        url = f"{self.base_url.rstrip('/')}/DASS/AccessMessages?DateFrom={fechaInicio}&AcreditationOwnerType=0&AcreditationOwner={str(dni)}&LatestMessagesFirst=false"
+
+        print("URL enviada:", url)
+        
+        response = requests.get(
+            url,        
+            auth=(self.auth_user, self.auth_pass),
+            headers={
+                "Accept": "application/json"
+            },
+            timeout=30
+        )
+
+        print("URL enviada:", response.url)
+        print("Status:", response.status_code)
+        print("Respuesta:", response.text)
+
+        response.raise_for_status()
+        return response.json()
+        
+        

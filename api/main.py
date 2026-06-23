@@ -355,6 +355,16 @@ def get_empleadoShifts(idEmpleado: int, fechaInicio: str, fechaFin: str):
     data = fact.getShiftsByEmployee(idEmpleado=idEmpleado, fechaInicio=fechaInicio, fechaFin=fechaFin)    
     return data
 
+
+@app.get("/api/empleadoShiftsDorlet", status_code=200)
+def get_empleadoShifts(dni: str, fechaInicio: str, fechaFin: str):  
+    fechaInicio = fechaInicio.split(" ")[0].replace("-", "/")
+    fechaFin    = fechaFin.split(" ")[0].replace("-", "/")
+
+    data = dorlet_api.getShiftsDorletByEmployee(dni=dni, fechaInicio=fechaInicio, fechaFin=fechaFin)    
+    return data
+
+
 @app.get("/api/getAllShiftsInDay", status_code=200)
 def get_allShiftsInDay(fechaInicio: str, db: Session = Depends(get_db)):  
 

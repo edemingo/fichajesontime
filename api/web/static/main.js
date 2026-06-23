@@ -73,7 +73,7 @@ filterForm.addEventListener("submit", async (e) => {
         <div class='col'>${r.codificado}</div>
         <div class='col-1'>${r.maquina}</div>
         <div class='col'>${r.nombre_archivo.replaceAll('Movimientos', '').replaceAll('.txt', '')}</div>
-        <div class='col-1 pt-2 text-end'><button type="button" class="btn btn-success ${showButton} " onclick="getEmpleadoShifts(${r.emp_id}, '${r.datetime.split(' ')[0].replaceAll('/', '-')}', '${r.datetime.split(' ')[0].replaceAll('/', '-')}')"> 
+        <div class='col-1 pt-2 text-end'><button type="button" class="btn btn-success ${showButton} " onclick="getEmpleadoShifts(${r.emp_id}, '${r.datetime.split(' ')[0].replaceAll('/', '-')}', '${r.datetime.split(' ')[0].replaceAll('/', '-')}', '${r.dni}')"> 
           <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-info-circle' viewBox='0 0 16 16'>
             <path d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16'/>
             <path d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0'/>
@@ -96,22 +96,35 @@ function useField(theValue, TheField){
 
 }
 
-function getEmpleadoShifts(idEmpleado, fechaInicio, fechaFin) {
+function getEmpleadoShifts(idEmpleado, fechaInicio, fechaFin, dni) {
     resp = fetch(`/api/empleadoShifts?idEmpleado=${idEmpleado}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
     .then(response => response.json())
-    .then(data => {
-      console.log('Shifts obtenidos:', data);
+    .then(data => {      
       appendShiftsModal(data);
+      getEmpleadoShiftsDorlet(dni, fechaInicio, fechaFin)
      })
     .catch(error => console.error('Error al obtener los shifts del empleado:', error));
     
 }
 
 
+function getEmpleadoShiftsDorlet(dni, fechaInicio, fechaFin) {
+
+  resp = fetch(`/api/empleadoShiftsDorlet?dni=${dni}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
+    .then(response => response.json())
+    .then(data => {      
+         appendShiftsModalDorlet(data);
+     })
+    .catch(error => console.error('Error al obtener los shifts del empleado:', error));
+  //http://{{dorlet_server_ip}}:{{dorlet_server_port}}/DASS/AccessMessages?DateFrom=2026/06/22&AcreditationOwnerType=0&AcreditationOwner=02910743R
+}
+
+
 function appendShiftsModal(shifts) {
     const modalElement = document.getElementById('shiftsModalContent');
-    const modalBody = modalElement.querySelector('.modal-body');  
-
+    //const modalBody = modalElement.querySelector('.modal-body');  
+    const modalBody =  document.getElementById('tabShifts');
+    
     shifts = shifts['data'];
     
     if (shifts.length === 0) {
@@ -131,15 +144,12 @@ function appendShiftsModal(shifts) {
                 <p><strong>Start Time:</strong> ` + s.clock_in + `</p>
                 <p><strong>End Time:</strong> ` + s.clock_out + `</p>
                 <p><strong>Minutes:</strong> ` + s.minutes + `</p>
-                
-
                 <pre class="shift-details border text-success p-2"><strong>Detalles del Shift:</strong>` + JSON.stringify(s, null, 2) + `</pre>
                 <hr>
             </div>`
        }     
 
        modalBody.innerHTML = contenidoShifts;
-
     }
 
       const modal = new bootstrap.Modal(modalElement);
@@ -147,8 +157,36 @@ function appendShiftsModal(shifts) {
 }
 
 
+function appendShiftsModalDorlet(shifts) {
+    //const modalElement = document.getElementById('shiftsModalContentDorlet');
+    const modalBodyDorlet =  document.getElementById('tabDorlet');
 
+    modalBodyDorlet.innerHTML = '...Cargando shifts desde Dorlet...'; 
+    
+    if (shifts.length === 0) {
+        modalBody.innerHTML = '<p>No se encontraron shifts para este empleado en las fechas seleccionadas.</p>';
+    } else {
 
+        var contenidoShifts = '';
+
+        for(let ii = 0; ii < shifts.length; ii++) {
+            var s = shifts[ii];
+
+            contenidoShifts = contenidoShifts +  `
+              <div class="shift-entry">
+              
+                  <p><strong>DeviceName:</strong> ` +  s.DeviceName + `</p>
+                  <p><strong>Empleado/a:</strong> ` +  s.Description + `</p>
+                  <p><strong>Card Code:</strong> ` + s.CardCode + `</p>
+                  <p><strong>Fecha y hora :</strong> ` + s.DateAndTime + `</p>
+                  <p><strong>Tipo:</strong> ` + s.PresenceValue + `</p>
+                  <pre class="shift-details border text-success p-2"><strong>Detalles del Shift:</strong>` + JSON.stringify(s, null, 2) + `</pre>
+                  <hr>
+              </div>`
+          }       
+      }    
+      modalBodyDorlet.innerHTML = contenidoShifts;
+}
 
 
 btnRefresh.addEventListener("click", async function (e) {
@@ -195,7 +233,6 @@ function obtenerFechaHoyG() {
   const dia = String(hoy.getDate()).padStart(2, '0');
   const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // meses van de 0 a 11
   const año = hoy.getFullYear();
-  console.log("Fecha hoy formateada:", `${año}-${mes}-${dia}`);
   return `${año}-${mes}-${dia}`;
 }
 
