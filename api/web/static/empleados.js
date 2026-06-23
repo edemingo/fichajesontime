@@ -66,8 +66,7 @@ btnFilter.addEventListener("click", async (e) => {
                     </svg>
                     </button>
                 </td>
-            </tr>
-            `;
+            </tr>`;
         });
 });
 

@@ -22,7 +22,7 @@
   -->
 
 <div class="container-fluid">
-    <h1 class="text-center">Consulta Accesos Tornos MARCONI 1</h1>
+    <h1 class="text-center">Consulta Accesos Tornos/Dorlet</h1>
     <!-- start row principal -->
     <div class="row ">
 
@@ -41,43 +41,72 @@
         </div>
         <!-- END : MENU VERTICAL -->
 
-        <!-- col 9 principal LISTADO-->
-        <div class="col-9 ">
+        <!-- col 11 principal LISTADO-->
+        <div class="col-11  ">
 
                 <form id="filter-form">
 
-                    <div class="row  pb-3">   
+                    <div class="row  pb-3 ">   
                                          
                         <div class="pt-3 col-2">
-                            <label>DNI:<br> <input type="text" class="form-control" name="dni" value=""/></label>
+                            <label>DNI:<br> <input type="text" class="form-control" name="dni" id="form_field_dni" value=""/></label>
                         </div>
                     
                         
                         <div class="p-3 col-2">
-                            <label>Num&nbsp;Empl.:<br> <input type="text" class="form-control" name="num_empleado"/></label>
+                            <label>Num&nbsp;Empl.:<br> <input type="text" class="form-control" name="num_empleado" id="form_field_num_empleado"/></label>
+                        </div>
+
+                        <div class="p-3 col-2 border-0 ">                           
+
+                            <div class="p-1">
+                                <label>Fecha desde <br> <input type="date" class="form-control" id="field_fecha"  name="fecha" ></label>
+                            </div>
+
                         </div>
                     
 
-                        <div class="p-3 col-3 border-0 "> 
-                            
-                            <div class="btn-group " role="group">
-
-                                    <div class="p-1">
-                                        <label>Fecha desde <br> <input type="date" class="form-control" id="field_fecha"  name="fecha" ></label>
-                                    </div>
-                                    <div  class="p-1">                                    
-                                        <label>Fecha hasta:<br> <input type="date" class="form-control" id="field_fecha_hasta"  name="fecha_hasta"/></label>
-                                    </div>
-                                    
+                        <div class="p-3 col-2 border-0 "> 
+                           
+                            <div  class="p-1">                                    
+                                <label>Fecha hasta:<br> <input type="date" class="form-control" id="field_fecha_hasta"  name="fecha_hasta"/></label>
                             </div>
-                            
+
                         </div>
+
 
                         
 
-                        <div class="p-3 col-3 border-0">
-                            &nbsp;<br>
-                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                                                
+                   
+                        <div class="p-3 col-2 text-start border-0"  >
+                             &nbsp;<br>
+                            
+                        </div>
+
+                     
+                    </div><!-- end of row -->
+
+
+                    <div class="row pb-3">
+
+                            <div class="col-4" id="localizations">
+                                <label>Localización</label>
+                                <select id="localizationsCombo" name="localizationsCombo" class="form-control" multiple>
+                                </select>
+                            </div>
+
+                            <div class="col-4" id="localizationsLect">
+                                <label>Lectora</label>
+                                <select id="localizationsLectCombo" name="localizationsLectCombo" class="form-control" size="4">
+                                </select>
+                            </div>
+
+                            <div class="col-4" >
+
+                                &nbsp;<br>
+
+                                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
 
                                 <button class="btn btn-success" id="button_buscar" type="submit">
                                     Buscar <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -104,23 +133,22 @@
                                     </svg> Limpiar
                                     </button>
 
+
+                                    
+                                    <br>&nbsp;
+                                    <button id="btn-refresh" class="btn btn-danger float-sm-right" type="submit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+                                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+                                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+                                    </svg> Actualizar datos</button>
+                                    
+
                             </div>
                         
-                        </div>
-                        
-                   
-                        <div class="p-3 col-2 text-end border-0"  >
-                             &nbsp;<br>
-                            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                            <button id="btn-refresh" class="btn btn-danger float-sm-right" type="submit">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
-                                <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
-                                <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
-                                </svg> Actualizar selección</button>
+                                
                             </div>
-                        </div>
-                     
                     </div>
+                        
                 
                              
                     <div class="row align-items-start pt-2">
@@ -144,19 +172,19 @@
 
                 </form>
 
-                 </div>  
-
-            </div>
-
-        </div>
-        <!-- end of col 9 principal LISTADO-->
-
-        <div class="col-2 border-1">
-            <!-- ESTADISTICA -->
-        </div>
+        </div>  
+        <!-- end of col 11 principal LISTADO-->
+        
+        
+        
         
 
     </div>
+        
+    
+        
+
+    
 
 </div>
 <!-- end  row principal -->

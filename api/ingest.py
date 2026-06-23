@@ -14,7 +14,7 @@ class Ingest:
         self.cur = None
 
 
-
+    
     """
     Ingesta y actualización del último fichero
     """
@@ -26,9 +26,12 @@ class Ingest:
         total_insertados = 0
 
         if archivos:
-
             archivo_mas_reciente = max(archivos, key=lambda f: f.stat().st_mtime)
 
+        print('-------------------------------------------------')
+        print('--- Ultimo archivo encontrado para actualizar -------')
+        print(archivo_mas_reciente)
+        print('-------------------------------------------------')
 
         self.cur.execute(
             "DELETE FROM indice_texto_detalle WHERE nombre_archivo = %s",
@@ -70,19 +73,95 @@ class Ingest:
     """
     Ingesta y actualización de un fichero
     """
+
+
+    def updateFromFileByParams(self, theDay, theMonth, theYear):
+        self.dbconnection()
+        archivos = []
+        theDay = int(theDay)
+        theMonth = int(theMonth)
+        theYear = int(theYear)
+
+        
+        
+        #archivos = [f for f in self.directorio.iterdir() if f.is_file(): echa_mod = datetime.fromtimestamp(archivo.stat().st_mtime)]
+
+        for archivo in self.directorio.iterdir():
+            if archivo.is_file():
+                
+                # Obtenemos la fecha de última modificación
+                fecha_mod = datetime.fromtimestamp(archivo.stat().st_mtime)
+                """
+                print(archivo)
+                print(fecha_mod)
+                print(fecha_mod.day)
+                print(fecha_mod.month)
+                print(fecha_mod.year)
+                """
+                # Comparamos si coincide con los parámetros
+                if fecha_mod.day == theDay and fecha_mod.month == theMonth and fecha_mod.year == theYear:
+                    archivos.append(archivo)
+                    
+
+        
+        total_insertados = 0
+
+        if archivos:
+            archivo_mas_reciente = max(archivos, key=lambda f: f.stat().st_mtime)
+
+
+        print(archivos)
+
+        
+        self.cur.execute(
+            "DELETE FROM indice_texto_detalle WHERE nombre_archivo = %s", (archivo_mas_reciente.name,)
+        )
+
+        with open(archivo_mas_reciente, "r", encoding="utf-8") as f:
+            for num_linea, linea in enumerate(f, start=1):
+                linea = linea.strip()
+                if linea:
+                    campos = linea.split("|")
+                    
+                    if len(campos) >= 6:
+                        datetime_str, dni, num_empleado, maquina, codigo, codificado = campos[:6]
+                        
+                        self.cur.execute("""
+                            INSERT INTO indice_texto_detalle (nombre_archivo, num_linea, datetime, dni, num_empleado, maquina, codigo, codificado)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            archivo_mas_reciente.name, 
+                            num_linea, 
+                            datetime_str, 
+                            dni, 
+                            num_empleado, 
+                            maquina, 
+                            codigo, 
+                            codificado
+
+                            ))
+                        
+                        total_insertados = total_insertados +1
+                        
+        self.conn.commit()        
+        self.dbConnnectionClose()
+                 
+
+
+
     def updateFromFile(self, nombre_fichero):
         
         self.dbconnection()
         
         archivos = [f for f in self.directorio.iterdir() if f.is_file() and f.name == nombre_fichero]
         total_insertados = 0
+        
 
         if archivos:
             archivo_mas_reciente = max(archivos, key=lambda f: f.stat().st_mtime)
             
         self.cur.execute(
-            "DELETE FROM indice_texto_detalle WHERE nombre_archivo = %s",
-            (archivo_mas_reciente.name,)
+            "DELETE FROM indice_texto_detalle WHERE nombre_archivo = %s", (archivo_mas_reciente.name,)
         )
 
         with open(archivo_mas_reciente, "r", encoding="utf-8") as f:
@@ -114,7 +193,7 @@ class Ingest:
         self.conn.commit()        
         self.dbConnnectionClose()
 
-
+ 
 
     """
     Listado de Ficheros
@@ -226,6 +305,7 @@ class Ingest:
 
         self.delete_sifts_before_insert(fecha=fecha)
         
+        """"""
         self.dbconnection()
 
         # Definición de la consulta

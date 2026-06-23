@@ -5,10 +5,12 @@
 const button_buscar = document.getElementById('button_buscar');
 const fieldFechaDesde = document.getElementById('field_fecha')
 const btnRefreshSelected = document.getElementById('btn-refresh-selected') 
+const localizationsCombo = document.getElementById("localizationsCombo")
+
+const localizacionDef = 'Marconi01'
 
 let myChartInstance = null;
 let myChartTotalInstance = null;
-
 
 
 
@@ -50,7 +52,7 @@ btnRefreshSelected.addEventListener("click", async function(){
 
 
 
-const fichajesComerdor = async function(ahora) {
+const fichajesComedor = async function(ahora) {
     if (ahora === null){
         var  ahora = new Date().toISOString().split('T')[0];
     }    
@@ -64,7 +66,8 @@ const totalizadorFichajes = async function(ahora) {
     if (ahora === null){
         var  ahora = new Date().toISOString().split('T')[0];
     }    
-    var  resp = await fetch(`/api/totalizadorFichajes?fecha=` + ahora);
+    var  centro = localizationsCombo.value;
+    var  resp = await fetch(`/api/totalizadorFichajes?fecha=` + ahora + `&centro=` + centro);
     var  data = await resp.json();
 
     await totalizadorFichajesChart(data)
@@ -160,8 +163,9 @@ const fichajesmediahora = async function(ahora) {
     if (ahora === null){
         var  ahora = new Date().toISOString().split('T')[0];
     }
-    
-    var  resp = await fetch(`/api/fichajesmediahora?fecha=` + ahora);
+
+    var  centro = localizationsCombo.value;
+    var  resp = await fetch(`/api/fichajesmediahora?fecha=` + ahora + `&centro=` + centro);
     var  data = await resp.json();
     
 
@@ -252,9 +256,69 @@ const fichajesmediahora = async function(ahora) {
 }
 
 
+
+localizationsCombo.addEventListener("change", async function(){
+
+  centro = this.value;
+  const event = new Event('change', { bubbles: true });
+  fieldFechaDesde.dispatchEvent(event);
+
+});
+
+
+async function getLocatizations(params) {
+  
+    var resp = await fetch (`/api/getLocalizaciones`);
+    //var  resp = await fetch(`/api/actualizarFromFile?nombre_fichero=` + patronFichero);
+    var  data = await resp.json();
+
+    const select = document.getElementById("localizationsCombo");
+
+    if(select.length > 0){
+
+    } else {
+    
+      // Limpiamos opciones previas
+        select.innerHTML = "";
+
+        const option = document.createElement("option");
+                option.value = 'all';          
+                // Texto visible (puedes ajustar el formato)
+                option.textContent = 'Todos';
+                select.appendChild(option);
+
+        // Recorremos el JSON
+        data.forEach(item => {
+            // Creamos la opción
+            const option = document.createElement("option");
+            
+            // Valor interno (por ejemplo el código)
+            option.value = item.centro;
+            
+            // Texto visible (puedes ajustar el formato)
+            option.textContent = `${item.centro}`;
+            
+            // Añadimos al select
+            select.appendChild(option);
+        });
+
+        if(select.selectedIndex == 0){
+            select.value = localizacionDef;
+        }
+    
+    }
+   
+
+    
+
+
+}
+
+
 function runGetData(ahora){
 
-    fichajesComerdor(ahora)
+    getLocatizations();
+    fichajesComedor(ahora);
     fichajesmediahora(ahora);
     totalizadorFichajes(ahora)
 }

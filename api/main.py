@@ -8,20 +8,24 @@ from typing import List, Optional
 from starlette.responses import HTMLResponse 
 from ingest import Ingest
 from factorial import Factorial
+from vehiculos import FactorialVehicleAPI
 from scheduler import Scheduler
 from stats import Stats
 from models import Base, FicherosExportados, IndiceTextoDetalle, engine, SessionLocal
 from contextlib import asynccontextmanager
 from sqlalchemy import text
 from datetime import datetime
+import time
+from dorlet import DorletAPI
 
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine) 
 ingest = Ingest()
 app = FastAPI()
 fact = Factorial(ingest)
 
-scheduler = Scheduler(ingest)
-schedulerTime = 5 # minutos
+dorlet_api = DorletAPI()
+scheduler = Scheduler(ingest, dorlet_api.alive)
+schedulerTime = 2 # minutos
 
 stats = Stats()
 
@@ -32,7 +36,7 @@ async def lifespan(app: FastAPI):
     yield
     scheduler.stop()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan) #
 
 # --- Servir archivos estáticos (CSS, JS, etc.) ---
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
@@ -57,6 +61,12 @@ def web_index():
         html = f.read()
     return HTMLResponse(html)
 
+@app.get("/alive")
+def web_alive():
+    # Sirve el HTML directamente desde templates como texto plano
+    isAlive = dorlet_api.alive()    
+    return { 'status_code': isAlive, "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S") }
+
 
 @app.get("/empleados")
 def web_index():
@@ -77,6 +87,13 @@ def web_index():
 def web_index():
     # Sirve el HTML directamente desde templates como texto plano
     with open("web/templates/informes.html", encoding="utf-8") as f:
+        html = f.read()
+    return HTMLResponse(html)
+
+@app.get("/vehiculos")
+def web_index():
+    # Sirve el HTML directamente desde templates como texto plano
+    with open("web/templates/vehiculos.html", encoding="utf-8") as f:
         html = f.read()
     return HTMLResponse(html)
 
@@ -112,10 +129,52 @@ def crear_fichero(nombre: str, db: Session = Depends(get_db)):
 def actualizarHoy(db: Session = Depends(get_db)):
     ingest.updateLastFile()
 
+@app.get('/api/getLocalizaciones')
+def localizaciones(db: Session = Depends(get_db)):
+
+    sql = "SELECT distinct centro from lectoras_centro order by centro desc" 
+    result = db.execute(text(sql)).fetchall()
+
+    return [
+        {
+            "centro": r.centro,
+            "centro": r.centro,
+        }
+        for r in result
+    ]
+
+@app.get('/api/getLocalizacionesLectores')
+def localizacionesLectores(
+    centro: Optional[str] = Query(None), 
+    db: Session = Depends(get_db)):
+
+    sql = "SELECT * from lectoras_centro where centro = '" + centro +  "' order by centro desc" 
+    result = db.execute(text(sql)).fetchall()
+
+    return [
+        {
+            "id": r.id,
+            "centro": r.centro,
+            "lectora": r.lectora,
+            "codigo": r.codigo,
+        }
+        for r in result
+    ]
+
 
 @app.get('/api/actualizarFromFile')
 def actualizarFromFile(nombre_fichero: str, db: Session = Depends(get_db)):
     ingest.updateFromFile(nombre_fichero)
+
+
+@app.get('/api/updateFromFileByParams')
+def actualizarFromFile(
+    theDay: int = Query(default_factory=lambda: datetime.now().day),
+    theMonth: int = Query(default_factory=lambda: datetime.now().month),
+    theYear: int = Query(default_factory=lambda: datetime.now().year),
+    db: Session = Depends(get_db)
+    ):
+    ingest.updateFromFileByParams(theDay, theMonth, theYear)
 
 
 @app.get('/api/verFichero')
@@ -130,6 +189,8 @@ def listar_indice(
     dni: Optional[str] = Query(None, description="Filtrar por DNI"),
     fecha: Optional[str] = Query(None, description="Filtrar por fecha (campo datetime, formato texto)"),
     fecha_hasta: Optional[str] = Query(None, description="Filtrar por fecha hasta (campo datetime,  formato texto)"),
+    localizationsCombo: Optional[str] = Query(None, description="Filtrar por localizationsCombo "),
+    localizationsLectCombo: Optional[str] = Query(None, description="Filtrar por localizationsLectCombo"),
     db: Session = Depends(get_db),
 ):
     # Construir consulta SQL dinámica
@@ -142,7 +203,7 @@ def listar_indice(
     
     if dni is not None:
         sql += " AND i.dni = :dni"
-        params["dni"] = dni
+        params["dni"] = dni 
 
     if fecha is not None and fecha_hasta is None:
         sql += " AND to_date(split_part(i.datetime, ' ', 1), 'YYYY/MM/DD') = :fecha"
@@ -156,8 +217,18 @@ def listar_indice(
         sql += " AND to_date(split_part(i.datetime, ' ', 1), 'YYYY/MM/DD') BETWEEN DATE :fecha AND DATE :fecha_hasta"        
         params["fecha"] = fecha    
         params["fecha_hasta"] = fecha_hasta
+
+
+    if (localizationsCombo is not None and localizationsCombo != 'all') and localizationsLectCombo == 'all':
+        sql += " AND i.codificado in (SELECT codigo from lectoras_centro where centro = :localizationsCombo  ) "
+        params["localizationsCombo"] = localizationsCombo
     
     
+    if (localizationsCombo is not None and localizationsCombo != 'all') and (localizationsLectCombo is not None and localizationsLectCombo != 'all'):
+        sql += " AND i.codificado in (SELECT codigo from lectoras_centro where centro = :localizationsCombo and codigo in (:localizationsLectCombo) ) "
+        params["localizationsLectCombo"] = localizationsLectCombo
+        params["localizationsCombo"] = localizationsCombo
+
     # Ordenar
     if num_empleado:
         sql += " ORDER BY i.num_empleado DESC, to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS') ASC"
@@ -165,7 +236,10 @@ def listar_indice(
         sql += " ORDER BY to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS') DESC"
     else:
         sql += " ORDER BY to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS')  DESC"
-    
+
+
+    print(sql)
+
     result = db.execute(text(sql), params).fetchall()
     
     return [
@@ -256,6 +330,7 @@ def get_empleadosList(
     sql += " ORDER BY e.id OFFSET :offset LIMIT :limit"
     params["offset"] = offset
     params["limit"] = limit
+
     
     result = db.execute(text(sql), params).fetchall()
     
@@ -359,11 +434,12 @@ def get_fichajeshora(fecha: Optional[str] = Query(None, description="Filtrar por
 @app.get("/api/fichajesmediahora", status_code=200)
 def get_fichajes_media_hora(
     fecha: Optional[str] = Query(None),
+    centro: Optional[str] = Query(None),
     horaDesde: Optional[str] = Query("06:00"),
     horaHasta: Optional[str] = Query("23:59"),
     db: Session = Depends(get_db),
 ):
-    return stats.fichjesMediaHora(db=db,fecha=fecha,horaDesde=horaDesde,horaHasta=horaHasta)
+    return stats.fichjesMediaHora(db=db,fecha=fecha,centro=centro,horaDesde=horaDesde,horaHasta=horaHasta)
 
 
 @app.get("/api/fichajesComedor", status_code=200)
@@ -376,10 +452,11 @@ def get_fichajes_media_hora(
 
 @app.get("/api/totalizadorFichajes", status_code=200)
 def get_fichajes_media_hora(
-    fecha: Optional[str] = Query(None),    
+    fecha: Optional[str] = Query(None),   
+    centro: Optional[str] = Query(None), 
     db: Session = Depends(get_db),
 ):
-    return stats.totalizadorFichajesDia(db=db,fecha=fecha)
+    return stats.totalizadorFichajesDia(db=db,fecha=fecha,centro=centro)
 
 
 
@@ -450,3 +527,20 @@ def get_fichajes_media_hora(
     }
 
 
+
+
+@app.get("/api/getSchedulerTime", status_code=200)
+def getSchedulerTime():
+    # 3. Probamos la función
+    time.sleep(2) # Esperamos 2 segundos para simular el paso del tiempo
+    # quedan = scheduler.tiempo_restante('mi_tarea_id')
+    quedan = None
+    tareas = scheduler.getJobs()
+    print("Tareas pendientes")
+    print(tareas)
+
+    if quedan:
+        print(f"Tiempo restante: {quedan}")
+        print(f"En segundos totales: {quedan.total_seconds()} segundos")
+    else:
+        print("La tarea no está programada o ya no tiene ejecuciones pendientes.")

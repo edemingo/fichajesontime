@@ -11,13 +11,14 @@ class Stats:
         self.cur = None
 
 
-    def fichjesMediaHora(self, db : Session, fecha: Optional[str] = Query(None), horaDesde: Optional[str] = Query("07:00"), horaHasta: Optional[str] = Query("22:00")):
+    def fichjesMediaHora(self, db : Session, fecha: Optional[str] = Query(None), centro: Optional[str] = Query('all'), horaDesde: Optional[str] = Query("07:00"), horaHasta: Optional[str] = Query("22:00")):
         
         if not fecha:
             raise HTTPException(status_code=400, detail="El parámetro 'fecha' es obligatorio")
 
         fechadesde = f"{fecha} {horaDesde}:00"
         fechahasta = f"{fecha} {horaHasta}:00"
+        centro     = f"{centro}"
 
         query = text("""
         WITH intervalos AS (
@@ -37,9 +38,10 @@ class Stats:
                 SELECT
                     codigo,
                     to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS') AS ts
-                FROM public.indice_texto_detalle
+                FROM indice_texto_detalle
                 WHERE codigo IN ('01', '51')
                   AND to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS')::date = CAST(:fecha AS date)
+                  AND codificado in (select codigo from lectoras_centro where centro in (:centro))
             ) t
             GROUP BY media_hora
         )
@@ -58,6 +60,7 @@ class Stats:
 
         result = db.execute(query, {
             "fecha": fecha,
+            "centro" : centro, 
             "fechadesde": fechadesde,
             "fechahasta": fechahasta,
         })
@@ -104,7 +107,7 @@ class Stats:
     
 
         
-    def totalizadorFichajesDia(self, db : Session, fecha: Optional[str] = Query(None)):
+    def totalizadorFichajesDia(self, db : Session, fecha: Optional[str] = Query(None), centro: Optional[str] = Query('all')):
 
         if not fecha:
             raise HTTPException(status_code=400, detail="El parámetro 'fecha' es obligatorio")
@@ -115,9 +118,10 @@ class Stats:
                 codigo,
                 dni,
                 to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS') AS ts
-            FROM public.indice_texto_detalle
+            FROM indice_texto_detalle
             WHERE codigo IN ('01', '51', '02')
             AND to_timestamp(datetime, 'YYYY/MM/DD HH24:MI:SS')::date = CAST(:fecha AS date)
+            AND codificado in (select codigo from lectoras_centro where centro in (:centro))
         ), acumulado AS (
             SELECT
                 ts,
@@ -145,7 +149,8 @@ class Stats:
         """)
 
         result = db.execute(query, {
-            "fecha": fecha,          
+            "fecha": fecha,
+            "centro" : centro,
         })
         
         rows = result.mappings().all()

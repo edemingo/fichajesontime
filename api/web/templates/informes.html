@@ -20,7 +20,7 @@
   -->
 
 <div class="container-fluid">
-    <h1 class="text-center">Informes Accesos Marconi I</h1>
+    <h1 class="text-center">Informes Accesos</h1>
     <!-- start row principal -->
     <div class="row ">
          <div class="row ">
@@ -46,12 +46,13 @@
 
             <div class="row border border-top-0 border-start-0 border-end-0">
 
-              <div class="p-4 col-4 "> 
+              <div class="p-4 col-2 "> 
                               
                     <!-- <div class="btn-group " role="group"></div> -->
                             <div class="p-1">
                                 <label ><input type="date" class="form-control" id="field_fecha"  name="fecha" ></label>
                             </div>
+                            
                             <!-- 
                             <div  class="p-1">                                    
                                 <label>Fecha hasta:<br> <input type="date" class="form-control" id="field_fecha_hasta"  name="fecha_hasta"/></label>
@@ -61,7 +62,13 @@
                       
               </div>
 
-              <div class="p-5 col-2 ">
+               <div class="col-3" id="localizations">
+                                <label>Localización</label>
+                                <select id="localizationsCombo" name="localizationsCombo" class="form-control" multiple>
+                                </select>
+                            </div>
+
+              <div class="p-5 col-1 ">
                       <button class="btn btn-success no-display" id="button_buscar" type="button">
                       Buscar <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>

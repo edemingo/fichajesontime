@@ -3,12 +3,13 @@ const filterForm = document.getElementById("filter-form");
 const btnRefresh = document.getElementById("btn-refresh");
 const btnHoy = document.getElementById("buscar-hoy");
 const btnAyer = document.getElementById("buscar-ayer"); 
-
+const localizationsCombo = document.getElementById("localizationsCombo")
 
 filterForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearAllResults()
   const formData = new FormData(e.target);
+
 
   const params = new URLSearchParams();
   for (const [key, value] of formData) {
@@ -63,9 +64,9 @@ filterForm.addEventListener("submit", async (e) => {
     return `
       ${separator}
       <div class="row m-1 p-1 align-items-start ${rowClass}">
-        <div class='col-1'>${r.dni}</div>
+        <div class='col-1'><a onClick="useField('${r.dni}','form_field_dni')" href="#" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${r.dni}</a></div>
         <div class='col-1'>${acceso}</div>
-        <div class='col-1'>${r.num_empleado}</div>
+        <div class='col-1'><a onClick="useField('${r.num_empleado}','form_field_num_empleado')" href="#" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${r.num_empleado}</a></div>
         <div class='col-2'>${fullName}</div>
         <div class='col-2'>${r.datetime}</div>
         <div class='col'>${r.codigo}</div>
@@ -86,6 +87,14 @@ filterForm.addEventListener("submit", async (e) => {
   .join("");
 });
 
+function useField(theValue, TheField){
+
+  const theField = document.getElementById(TheField)
+  const btnBuscar = document.getElementById('button_buscar')
+  theField.value = theValue;
+  btnBuscar.click();
+
+}
 
 function getEmpleadoShifts(idEmpleado, fechaInicio, fechaFin) {
     resp = fetch(`/api/empleadoShifts?idEmpleado=${idEmpleado}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
@@ -141,7 +150,7 @@ function appendShiftsModal(shifts) {
 
 
 
-/*
+
 btnRefresh.addEventListener("click", async function (e) {
     e.preventDefault();
 
@@ -150,9 +159,9 @@ btnRefresh.addEventListener("click", async function (e) {
     // procesar data...
     appendAlert('Datos de hoy actualizados correctamente', 'success')
 });
-*/
 
 
+/*
 btnRefresh.addEventListener("click", async function(){
     fieldFechaDesde = document.getElementById("field_fecha")
     theDay = fieldFechaDesde.value;
@@ -161,13 +170,15 @@ btnRefresh.addEventListener("click", async function(){
     var mm =  theDay.split('-')[1]
     var yyyy =  theDay.split('-')[0]
     var patronFichero = "Movimientos" + dd + "_" + mm  + "_" + yyyy + ".txt"
-    var  resp = await fetch(`/api/actualizarFromFile?nombre_fichero=` + patronFichero);
+    
+    var resp = await fetch (`/api/updateFromFileByParams?theDay=` + dd + `&theMonth=` + mm + `&theYear=` + yyyy);
+    //var  resp = await fetch(`/api/actualizarFromFile?nombre_fichero=` + patronFichero);
     var  data = await resp.json();
   
     appendAlert('Datos del dia <b>' + dd + '-' + mm + '-' + yyyy + '</b> actualizados correctamente', 'success')
 
 });
-
+*/
 
 
 
@@ -221,7 +232,114 @@ document.getElementById("buscar-ayer").addEventListener("click", function() {
 });
 
 
+localizationsCombo.addEventListener("change", async function(){
 
+  centro = this.value;
+
+  var resp = await fetch (`/api/getLocalizacionesLectores?centro=` + centro);
+    //var  resp = await fetch(`/api/actualizarFromFile?nombre_fichero=` + patronFichero);
+    var  data = await resp.json();
+
+    const selectLectores = document.getElementById("localizationsLectCombo");
+
+     // Limpiamos opciones previas
+      selectLectores.innerHTML = "";
+
+      const option = document.createElement("option");
+            option.value = 'all';          
+            // Texto visible (puedes ajustar el formato)
+            option.textContent = 'Todos';
+            selectLectores.appendChild(option);
+
+      // Recorremos el JSON
+      data.forEach(item => {
+          // Creamos la opción
+          const option = document.createElement("option");
+          
+          // Valor interno (por ejemplo el código)
+          option.value = item.codigo;          
+          // Texto visible (puedes ajustar el formato)
+          option.textContent = `${item.codigo + " (" + item.lectora + ')'}`;
+          
+          // Añadimos al select
+          selectLectores.appendChild(option);
+      });
+
+        selectLectores.selectedIndex = 0;
+
+        document.getElementById("button_buscar").click();
+
+})
+
+
+async function getLocatizations(params) {
+  
+    var resp = await fetch (`/api/getLocalizaciones`);
+    //var  resp = await fetch(`/api/actualizarFromFile?nombre_fichero=` + patronFichero);
+    var  data = await resp.json();
+
+    const select = document.getElementById("localizationsCombo");
+    
+      // Limpiamos opciones previas
+    select.innerHTML = "";
+
+    const option = document.createElement("option");
+            option.value = 'all';          
+            // Texto visible (puedes ajustar el formato)
+            option.textContent = 'Todos';
+            select.appendChild(option);
+
+    // Recorremos el JSON
+    data.forEach(item => {
+        // Creamos la opción
+        const option = document.createElement("option");
+        
+        // Valor interno (por ejemplo el código)
+        option.value = item.centro;
+        
+        // Texto visible (puedes ajustar el formato)
+        option.textContent = `${item.centro}`;
+        
+        // Añadimos al select
+        select.appendChild(option);
+    });
+
+}
+
+
+
+
+async function getLocatizationsLectores(params) {
+  
+    var resp = await fetch (`/api/getLocalizacionesLectores`);
+    //var  resp = await fetch(`/api/actualizarFromFile?nombre_fichero=` + patronFichero);
+    var  data = await resp.json();
+
+    console.log(data)
+
+    const select = document.getElementById("localizationsLectCombo");
+    
+      // Limpiamos opciones previas
+    select.innerHTML = "";
+
+    // Recorremos el JSON
+    data.forEach(item => {
+        // Creamos la opción
+        const option = document.createElement("option");
+        
+        // Valor interno (por ejemplo el código)
+        option.value = item.codigo;
+        
+        // Texto visible (puedes ajustar el formato)
+        option.textContent = `${item.lectora}`;
+        
+        // Añadimos al select
+        select.appendChild(option);
+    });
+
+   
+
+}
 
 
 
@@ -232,6 +350,8 @@ window.onload = function() {
 
       document.getElementById("field_fecha").value=obtenerFechaHoyG();
       document.getElementById("button_buscar").click(); // Carga inicial de datos de hoy al abrir la página
+
+      getLocatizations()
 
 
       //btnAyer.click(); // Carga inicial de datos de ayer al abrir la página

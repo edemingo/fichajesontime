@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 class Factorial:
 
 
-
     def __init__(self, ingest):
         self.ingest = ingest
         # Cargar variables desde config.env
